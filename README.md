@@ -30,8 +30,9 @@ and restrained typography inspired by the atmosphere of Hollow Knight.
 Run it locally after installing the single app dependency:
 
 ```bash
-python3 -m pip install -r requirements.txt
-streamlit run app.py
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/streamlit run streamlit_app.py
 ```
 
 For Streamlit Community Cloud, connect the GitHub repository, choose `main` as

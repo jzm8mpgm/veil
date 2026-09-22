@@ -20,6 +20,25 @@ python3 -m veil 1985 --json
 python3 -m unittest discover -s tests -v
 ```
 
+## Streamlit interface
+
+The graphical prototype lives at [`app.py`](app.py). It keeps the draw engine
+offline and presents one quiet input, one reveal and an expandable source
+panel. The visual system uses an ink background, parchment text, amber light
+and restrained typography inspired by the atmosphere of Hollow Knight.
+
+Run it locally after installing the single app dependency:
+
+```bash
+python3 -m pip install -r requirements.txt
+streamlit run app.py
+```
+
+For Streamlit Community Cloud, connect the GitHub repository, choose `main` as
+the branch and `app.py` as the entrypoint. Community Cloud reads the root
+`requirements.txt` and `.streamlit/config.toml`; subsequent GitHub commits
+become app updates through the connected deployment.
+
 Omit `--seed` for a new draw. A printed seed lets you repeat it against this data/code version. A year without a birthday gives the age you turn this year, not necessarily your age today. JSON exposes the same results for a future web interface.
 
 The seed `1` example was selected to demonstrate a named city (India / Kolkata); it is not representative of how often named cities appear. [Read the full example](EXAMPLE.txt).

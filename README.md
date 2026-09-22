@@ -58,7 +58,7 @@ The seed `1` example was selected to demonstrate a named city (India / Kolkata);
 | City/settlement | Historical population of 100 major cities, weighted against national population | Population is a birth-share proxy; most places are outside this city sample |
 | Socioeconomic group | Uniform draw across five income ranks | Illustrative only: equal population fifths are not equal shares of births |
 | Income context | Latest available GNI per capita at purchasing power parity | National income per resident, **not expected salary** |
-| Birth-year survival | UN WPP period life expectancy plus infant and under-five mortality in the birth year | A period scenario: one draw can end before age one, between one and five, or survive to five |
+| Life-course outcome | UN WPP period life expectancy plus infant and under-five mortality in the birth year | A seeded draw can end in infancy, childhood or later life; otherwise it reports the age reached today |
 | Longevity context | Latest available period life expectancy at birth | **Not remaining life expectancy at your current age** |
 | Mortality context | Latest comparable observed causes/groups | Population pattern, **not a forecast of your death** |
 

@@ -24,6 +24,32 @@ def likelihood_label(probability):
     return 'very rare'
 
 
+def draw_death_cause(outcomes, rng):
+    """Choose a broad cause using the country's observed cause shares."""
+    row = outcomes.get('leading_death_category')
+    if not row or not row.get('groups_compared'):
+        return None
+    groups = {label: value for label, value in row['groups_compared'].items() if value is not None and value >= 0}
+    total = sum(groups.values())
+    if not groups or total <= 0:
+        return None
+    draw = rng.random() * total
+    cumulative = 0
+    selected = next(iter(groups))
+    for label, value in groups.items():
+        cumulative += value
+        if draw <= cumulative:
+            selected = label
+            break
+    return {
+        'label': selected,
+        'share': groups[selected],
+        'probability': groups[selected] / total,
+        'year': row['year'],
+        'source_url': row['source_url'],
+    }
+
+
 def _clean_story(value):
     """Keep the structured result focused on the drawn story."""
     if isinstance(value, dict):
@@ -47,7 +73,9 @@ def create_story(year, seed, today_year=None):
         'outcomes': get_outcomes(country['code'], today_year),
     }
     # Separate streams keep new narrative layers from reshuffling the birthplace.
-    story['early_life'] = draw_early_life(country['code'], year, random.Random(f'{seed}:early-life'))
+    story['early_life'] = draw_early_life(country['code'], year, random.Random(f'{seed}:early-life'), today_year)
+    if story['early_life'].get('alive_today') is False:
+        story['early_life']['cause_of_death'] = draw_death_cause(story['outcomes'], random.Random(f'{seed}:death-cause'))
     story['culture'] = describe_culture(country['code'], year, random.Random(f'{seed}:culture'))
     return _clean_story(story)
 
@@ -55,7 +83,7 @@ def create_story(year, seed, today_year=None):
 def render(story):
     c, city, group, o = (story[k] for k in ('country', 'settlement', 'socioeconomic', 'outcomes'))
     early = story['early_life']
-    childhood_death = early['outcome'] in ('died_in_infancy', 'died_in_early_childhood')
+    alive_today = early.get('alive_today', early['outcome'] == 'survived_to_five')
     lines = [
         '', 'V E I L', 'behind the veil of ignorance',
         'A birthplace drawn before you know your place in the world.', '',
@@ -70,21 +98,26 @@ def render(story):
     ]
     lines += ['', f"At birth in {story['birth_year']}"]
     if early['life_expectancy_at_birth'] is not None:
-        lines += [f"Life expectancy  ·  {early['life_expectancy_at_birth']:.1f} years",
+        lines += [f"Life expectancy  ·  {early['life_expectancy_at_birth']:.0f} years",
                   '                   Birth-year period average, already including infant deaths.']
     else:
         lines += ['Life expectancy  ·  No birth-year observation.']
     if early['infant_death_probability'] is not None:
         lines += [f"Before age one   ·  {early['infant_death_probability']:.1%} risk of death",
                   f"Before age five  ·  {early['under_five_death_probability']:.1%} risk of death (includes infancy)"]
-    if early['outcome'] == 'died_in_infancy':
+    if early['life_status'] == 'died_in_infancy':
         lines += ['', 'In this draw, this life ends before its first birthday.']
-    elif early['outcome'] == 'died_in_early_childhood':
-        lines += ['', 'In this draw, this life ends between its first and fifth birthdays.']
-    elif early['outcome'] == 'survived_to_five':
-        lines += ['', 'In this draw, you survive to your fifth birthday.',
-                  'The story continues from this fifth birthday.']
-    else:
+    elif early['life_status'] == 'died_in_early_childhood':
+        lines += ['', f"In this draw, this life ends at age {early['age_at_death']:.0f}."]
+    elif early['life_status'] == 'died_later':
+        lines += ['', f"In this draw, this life ends at age {early['age_at_death']:.0f}."]
+    elif alive_today:
+        lines += ['', f"In this draw, this life is still alive at age {early['age_now']}."]
+    if not alive_today and early.get('cause_of_death'):
+        cause = early['cause_of_death']
+        lines += [f"Cause of death  ·  {cause['label']} ({cause['year']})",
+                  f"                 {cause['share']:.0f}% of recorded deaths in this country."]
+    elif early['life_status'] == 'unavailable':
         lines += ['', 'Childhood survival  ·  No observation.']
     lines += ['', 'The household and culture around this life']
     for key, label in [('language', 'The language you speak'), ('religion', 'The faith around your home'), ('food', 'The food around you'), ('music', 'The music around you')]:
@@ -94,31 +127,31 @@ def render(story):
     lines += ['Culture  ·  Language, faith, food and music around this birthplace.']
     if city['kind'] in ('rural', 'urban') and story['culture'].get('terrain'):
         lines += [f"The landscape around you  ·  {story['culture']['terrain']}"]
-    if childhood_death:
+    if not alive_today:
         lines += ['']
     else:
         lines += ['', f"You would turn {story['age_this_year']} in {story['as_of_year']}.",
                   'Current country comparisons:']
     income, life, death = (o[k] for k in ('income', 'life_expectancy', 'leading_death_category'))
-    if not childhood_death and income:
+    if alive_today and income:
         lines += [f"Income context  ·  {income['value']:,.0f} international dollars / person / year ({income['year']})",
                   '                   Purchasing-power-adjusted GNI per capita.']
-    elif not childhood_death:
+    elif alive_today:
         lines += ['Income context  ·  No observation available.']
-    if not childhood_death and life:
-        lines += [f"For comparison  ·  Today's newborn life expectancy: {life['value']:.1f} years ({life['year']})",
+    if alive_today and life:
+        lines += [f"For comparison  ·  Today's newborn life expectancy: {life['value']:.0f} years ({life['year']})",
                   '                   Period measure for a newborn in that year.']
-    elif not childhood_death:
+    elif alive_today:
         lines += ['Life expectancy  ·  No observation available.']
     specific = o.get('leading_death_cause')
-    if not childhood_death and specific:
-        lines += [f"Leading cause  ·  {specific['label']} ({specific['year']})",
+    if alive_today and specific:
+        lines += [f"Most likely cause of death  ·  {specific['label']} ({specific['year']})",
                   f"                 WHO estimate for all ages and both sexes ({specific['year']})."]
-    elif not childhood_death and death:
-        lines += [f"Death context  ·  {death['label']} ({death['year']})",
+    elif alive_today and death:
+        lines += [f"Most likely cause of death  ·  {death['label']} ({death['year']})",
                   f"                 {death['value']:.1f}% of deaths; largest of three broad groups.",
                   '                 Largest broad category across all ages and sexes.']
-    elif not childhood_death:
+    elif alive_today:
         lines += ['Death context  ·  No comparable observation available.']
     lines += ['', 'The life drawn from the veil.', '',
               f"Birth data: UN WPP 2024 / Our World in Data; {c['coverage']:.3%} of world births covered.",
@@ -133,7 +166,7 @@ def render(story):
         row = story['culture'].get(key)
         if row and row.get('source_url'):
             lines += [f"{key.title()} source: {row['source_url']}"]
-    for row in (() if childhood_death else (income, life, specific or death)):
+    for row in (() if not alive_today else (income, life, specific or death)):
         if row:
             lines += [f"{row['label']}: {row['source_url']}"]
     lines += [f"Repeat this draw: python3 -m veil {story['birth_year']} --seed {shlex.quote(story['seed'])}", '']

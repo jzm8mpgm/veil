@@ -91,36 +91,43 @@ def show_map(story):
 
 
 def show_distribution(story):
-    choices = {'Life expectancy': 'life_expectancy', 'Income per resident': 'income'}
-    selected_label = st.selectbox('Compare this birthplace', list(choices), key='comparison_metric')
-    selected_key = choices[selected_label]
-    selected = story['outcomes'].get(selected_key)
-    if not selected:
-        return
-    indicator = selected['indicator']
-    rows = []
-    for code, country in outcomes_snapshot()['countries'].items():
-        series = country.get('indicators', {}).get(indicator, [])
-        if series:
-            row = next((item for item in series if item['year'] <= story['as_of_year']), None)
-            if row:
-                rows.append({'country': country['name'], 'value': row['value']})
-    if len(rows) < 10:
-        return
-    frame = pd.DataFrame(rows)
-    frame['value'] = pd.to_numeric(frame['value'])
-    unit = 'years' if selected_key == 'life_expectancy' else 'international dollars / person / year'
-    chart = alt.Chart(frame).transform_density('value', as_=['value', 'density'], extent=[float(frame.value.min()), float(frame.value.max())], steps=80).mark_area(orient='horizontal', color='#d6a86a', opacity=.52).encode(
-        y=alt.Y('value:Q', title=unit, axis=alt.Axis(format='.0f' if selected_key == 'income' else '.1f')),
-        x=alt.X('density:Q', title=None, axis=None),
-        tooltip=[alt.Tooltip('value:Q', format=',.1f'), alt.Tooltip('density:Q', format='.3f')],
+    charts = (
+        ('Life expectancy', 'life_expectancy', 'years', '.1f'),
+        ('Income per resident', 'income', 'international dollars / person / year', ',.0f'),
     )
-    marker = alt.Chart(pd.DataFrame([{'value': selected['value'], 'country': story['country']['name']}])).mark_rule(color='#f2e7cf', size=2).encode(
-        y=alt.Y('value:Q'), tooltip=[alt.Tooltip('country:N'), alt.Tooltip('value:Q', format=',.1f')]
-    )
-    st.markdown('<div class="eyebrow" style="margin-top:2rem">Among countries</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="reveal-copy">{selected_label} · {story["country"]["name"]} marked in ivory</div>', unsafe_allow_html=True)
-    st.altair_chart((chart + marker).properties(height=260), width='stretch')
+    rendered = False
+    for label, selected_key, unit, number_format in charts:
+        selected = story['outcomes'].get(selected_key)
+        if not selected:
+            continue
+        indicator = selected['indicator']
+        rows = []
+        for country in outcomes_snapshot()['countries'].values():
+            series = country.get('indicators', {}).get(indicator, [])
+            if series:
+                row = next((item for item in series if item['year'] <= story['as_of_year']), None)
+                if row:
+                    rows.append({'country': country['name'], 'value': row['value']})
+        if len(rows) < 10:
+            continue
+        rendered = True
+        frame = pd.DataFrame(rows)
+        frame['value'] = pd.to_numeric(frame['value'])
+        chart = alt.Chart(frame).transform_density(
+            'value', as_=['value', 'density'],
+            extent=[float(frame.value.min()), float(frame.value.max())], steps=80,
+        ).mark_area(orient='horizontal', color='#d6a86a', opacity=.52).encode(
+            y=alt.Y('value:Q', title=unit, axis=alt.Axis(format=number_format)),
+            x=alt.X('density:Q', title=None, axis=None),
+            tooltip=[alt.Tooltip('value:Q', format=number_format), alt.Tooltip('density:Q', format='.3f')],
+        )
+        marker = alt.Chart(pd.DataFrame([{'value': selected['value'], 'country': story['country']['name']}])).mark_rule(color='#f2e7cf', size=2).encode(
+            y=alt.Y('value:Q'), tooltip=[alt.Tooltip('country:N'), alt.Tooltip('value:Q', format=number_format)],
+        )
+        if not rendered or label == 'Life expectancy':
+            st.markdown('<div class="eyebrow" style="margin-top:2rem">Among countries</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="reveal-copy">{label} · {story["country"]["name"]} marked in ivory</div>', unsafe_allow_html=True)
+        st.altair_chart((chart + marker).properties(height=260), width='stretch')
 
 
 def render_result(story):
@@ -140,16 +147,21 @@ def render_result(story):
     fact('Place', place['name'], place_note)
     group = story['socioeconomic']
     fact('Circumstances', group['name'], f'{group["probability"]:.0%} · {likelihood_label(group["probability"])}')
-    fact('Birth-year life expectancy', f'{early["life_expectancy_at_birth"]:.1f} years' if early['life_expectancy_at_birth'] is not None else 'Unavailable', f'{early["year"]}')
+    fact('Birth-year life expectancy', f'{early["life_expectancy_at_birth"]:.0f} years' if early['life_expectancy_at_birth'] is not None else 'Unavailable', f'{early["year"]}')
     if early['infant_death_probability'] is not None:
         fact('Before age one', f'{early["infant_death_probability"]:.1%} risk', f'Before age five: {early["under_five_death_probability"]:.1%}')
-    outcome_labels = {
-        'died_in_infancy': 'This life ends before its first birthday.',
-        'died_in_early_childhood': 'This life ends between its first and fifth birthdays.',
-        'survived_to_five': 'You survive to your fifth birthday.',
-        'unavailable': 'Childhood outcome unavailable.',
-    }
-    fact('Early life', outcome_labels[early['outcome']])
+    if early['life_status'] == 'died_in_infancy':
+        outcome_label = 'This life ends before its first birthday.'
+    elif early['life_status'] in ('died_in_early_childhood', 'died_later'):
+        outcome_label = f'This life ends at age {early["age_at_death"]:.0f}.'
+    elif early.get('alive_today'):
+        outcome_label = f'This life is still alive at age {early["age_now"]}.'
+    else:
+        outcome_label = 'Life outcome unavailable.'
+    fact('Life outcome', outcome_label)
+    if not early.get('alive_today') and early.get('cause_of_death'):
+        cause = early['cause_of_death']
+        fact('Cause of death', cause['label'], f'{cause["share"]:.0f}% of recorded deaths · {cause["year"]}')
     st.markdown('<div class="eyebrow" style="margin-top:1.1rem">The life around this birthplace</div>', unsafe_allow_html=True)
     for key, label in [('language', 'The language you speak'), ('religion', 'The faith around your home'), ('food', 'The food around you'), ('music', 'The music around you')]:
         value = culture.get(key)
@@ -157,22 +169,22 @@ def render_result(story):
             st.markdown(f'<p class="culture-line">{value["text"]}</p>', unsafe_allow_html=True)
     if place['kind'] in ('rural', 'urban') and culture.get('terrain'):
         fact('The landscape around you', culture['terrain'])
-    if early['outcome'] not in ('died_in_infancy', 'died_in_early_childhood'):
+    if early.get('alive_today'):
         st.markdown('<div class="eyebrow" style="margin-top:1.1rem">The world today</div>', unsafe_allow_html=True)
         if outcomes.get('income'):
             income = outcomes['income']
             fact('Income context', f'{income["value"]:,.0f} international dollars / person / year', str(income['year']))
         if outcomes.get('life_expectancy'):
             life = outcomes['life_expectancy']
-            fact('Today’s newborn life expectancy', f'{life["value"]:.1f} years', str(life['year']))
+            fact('Today’s newborn life expectancy', f'{life["value"]:.0f} years', str(life['year']))
         death = outcomes.get('leading_death_cause') or outcomes.get('leading_death_category')
         if death:
-            fact('Leading cause context', death['label'], str(death['year']))
+            fact('Most likely cause of death', death['label'], str(death['year']))
         fact('Age this year', str(story['age_this_year']), str(story['as_of_year']))
     st.markdown('</div>', unsafe_allow_html=True)
     with st.expander('Sources'):
         st.markdown(f'<div class="source-note">Births: {country["url"]}<br>Settlement: {place["source"]}<br>Culture and food sources are included in the structured result.</div>', unsafe_allow_html=True)
-    if early['outcome'] not in ('died_in_infancy', 'died_in_early_childhood'):
+    if early.get('alive_today'):
         show_distribution(story)
     if st.button('Draw another beginning', key='draw_again'):
         st.session_state['veil_story'] = create_story(story['birth_year'], secrets.token_hex(6), date.today().year)

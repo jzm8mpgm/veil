@@ -54,3 +54,19 @@ class StoryTests(unittest.TestCase):
     def test_early_life_draw_changes_with_seed(self):
         outcomes = {create_story(1950, str(seed), 2026)['early_life']['outcome'] for seed in range(40)}
         self.assertGreater(len(outcomes), 1)
+
+    def test_life_course_reports_death_age_or_current_age(self):
+        deceased = create_story(1985, '6', 2026)['early_life']
+        living = create_story(1985, '0', 2026)['early_life']
+        self.assertEqual(deceased['life_status'], 'died_later')
+        self.assertLessEqual(deceased['age_at_death'], deceased['age_now'])
+        self.assertEqual(living['life_status'], 'alive_today')
+        self.assertIsNone(living['age_at_death'])
+        self.assertEqual(living['age_now'], 41)
+
+    def test_deceased_life_receives_seeded_cause_of_death(self):
+        first = create_story(1985, '6', 2026)['early_life']
+        second = create_story(1985, '6', 2026)['early_life']
+        self.assertIsNotNone(first['cause_of_death'])
+        self.assertEqual(first['cause_of_death'], second['cause_of_death'])
+        self.assertGreaterEqual(first['cause_of_death']['share'], 0)

@@ -27,12 +27,19 @@ The seed `1` example was selected to demonstrate a named city (India / Kolkata);
 | City/settlement | Historical population of 100 major cities, weighted against national population | Population is a birth-share proxy; most places are outside this city sample |
 | Socioeconomic group | Uniform draw across five income ranks | Illustrative only: equal population fifths are not equal shares of births |
 | Income context | Latest available GNI per capita at purchasing power parity | National income per resident, **not expected salary** |
+| Birth-year survival | UN WPP period life expectancy plus infant and under-five mortality in the birth year | A period scenario: one draw can end before age one, between one and five, or survive to five |
 | Longevity context | Latest available period life expectancy at birth | **Not remaining life expectancy at your current age** |
 | Mortality context | Latest comparable observed causes/groups | Population pattern, **not a forecast of your death** |
 
 Country probability is `births(country, year) / sum(births(covered countries, year))`. Regional and income-group aggregates never enter the lottery. Kosovo is retained separately, as in the source. Historical estimates are modelled demographic estimates, not a complete register of individual births. 2024 onwards is excluded because this edition labels those years projections.
 
 Settlement draws use the previous five-year observation, capped at 2020. “Elsewhere” includes unlisted cities, towns and rural areas; it does not mean rural. Countries outside the city sample say unavailable. See [settlement methods](data/settlements_sources.md). City and national population datasets have different vintages, explicitly reported. No invented adjustment links city or socioeconomic rank to income or health.
+
+When the city sample is compatible with a country's historical urban share, the settlement draw splits the remainder into an unlisted urban area or a rural area described as a village/dispersed countryside setting. It does not invent an exact village, household or occupation. The rural label is a population-class context, not a claim that every non-city birth happened on a farm.
+
+The birth-year life section uses the requested year's period life expectancy, infant mortality and under-five mortality. The infant and under-five outcomes are mutually exclusive: an infant death is not counted again in the under-five band. A child who dies in the simulated early-life draw does not receive adult earnings, present-day age or adult music/food experiences. The rates hold the birth-year mortality schedule fixed; they are not a reconstruction of one observed birth cohort.
+
+The cultural section describes country-level surroundings: listed languages, religious composition, the largest calorie-supply category as a staple proxy, and an explicitly illustrative local soundscape. It does not assign a personal language, faith, favourite food or listening history. The Factbook source is a pinned public-domain mirror; food categories come from FAO supply data processed by OWID. See the source URLs in each result.
 
 The counterfactual assumes continued residence in the drawn country. Migration, survival to today, occupation, sex, family circumstances and social mobility are not modelled. Today's comparison means the latest available observation in the bundled snapshot, not a measurement made today. Missing values remain missing.
 
@@ -48,8 +55,9 @@ See [outcome attribution and reuse terms](data/outcomes_sources.md), including W
 - Longevity: [World Bank life expectancy at birth](https://data.worldbank.org/indicator/SP.DYN.LE00.IN).
 - Mortality groups: [WHO Global Health Estimates via World Bank](https://data.worldbank.org/indicator/SH.DTH.NCOM.ZS).
 - Leading specific causes: [WHO Global Health Estimates 2021, published 2024](https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/ghe-leading-causes-of-death), 183 countries. The largest crude death rate among WHO's rankable causes, both sexes and all ages. This pandemic-year observation can rank COVID-19 first; it is not a forecast. Broad groups provide the fallback where available.
+- Birth-year survival: [UN WPP 2024 life expectancy](https://ourworldindata.org/grapher/life-expectancy), [infant mortality](https://ourworldindata.org/grapher/infant-mortality-rates), and [under-five mortality](https://ourworldindata.org/grapher/child-mortality-around-the-world), all processed by OWID. The bundled `data/history.json` records source metadata and checksums.
 
-To rebuild births, download the chart `.csv` and `.metadata.json`, then run `python3 scripts/fetch_births.py /path/to/births.csv /path/to/metadata.json`. Review changed coverage before committing. `python3 scripts/fetch_outcomes.py` refreshes the outcome snapshot and requires network access. The runtime never makes network requests.
+To rebuild births, download the chart `.csv` and `.metadata.json`, then run `python3 scripts/fetch_births.py /path/to/births.csv /path/to/metadata.json`. To rebuild historical survival, place the three `veil-*.csv` and metadata files in `/tmp` and run `python3 scripts/fetch_history.py`. `python3 scripts/fetch_outcomes.py` refreshes the outcome snapshot and requires network access. The runtime never makes network requests.
 
 ## Next version
 

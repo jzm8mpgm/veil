@@ -9,13 +9,15 @@ import shlex
 from .births import draw_country
 from .outcomes import get_outcomes
 from .settlements import draw_settlement, draw_socioeconomic
+from .history import draw_early_life
+from .culture import describe_culture
 
 
 def create_story(year, seed, today_year=None):
     today_year = today_year if today_year is not None else date.today().year
     rng = random.Random(str(seed))
     country = draw_country(year, rng)
-    return {
+    story = {
         'title': 'VEIL — another beginning', 'birth_year': year,
         'age_this_year': today_year - year, 'as_of_year': today_year,
         'seed': str(seed), 'country': country,
@@ -23,10 +25,16 @@ def create_story(year, seed, today_year=None):
         'socioeconomic': draw_socioeconomic(rng),
         'outcomes': get_outcomes(country['code'], today_year),
     }
+    # Separate streams keep new narrative layers from reshuffling the birthplace.
+    story['early_life'] = draw_early_life(country['code'], year, random.Random(f'{seed}:early-life'))
+    story['culture'] = describe_culture(country['code'], year, random.Random(f'{seed}:culture'))
+    return story
 
 
 def render(story):
     c, city, group, o = (story[k] for k in ('country', 'settlement', 'socioeconomic', 'outcomes'))
+    early = story['early_life']
+    childhood_death = early['outcome'] in ('died_in_infancy', 'died_in_early_childhood')
     lines = [
         '', 'V E I L', 'another beginning', '',
         f"The year is {story['birth_year']}. The place could have been different.", '',
@@ -34,34 +42,67 @@ def render(story):
         f"{c['births']:,} estimated births that year. A {c['probability']:.2%} chance in this draw.",
         '', f"Place  ·  {city['name']}",
         f"          {city['year']} population proxy; city birth counts are unavailable.",
-        f"          {city['covered_cities']} cities covered in this country; other places remain in the draw.",
+        f"          {city.get('detail') or 'The settlement detail is unavailable for this country and year.'}",
         '', f"Circumstances  ·  {group['name']}",
         '                 Illustrative 20% draw, not measured birth odds.',
-        '', f"You would turn {story['age_this_year']} in {story['as_of_year']}.",
-        'If you still lived there, the latest country-level comparisons are:', '',
     ]
+    lines += ['', f"At birth in {story['birth_year']}"]
+    if early['life_expectancy_at_birth'] is not None:
+        lines += [f"Life expectancy  ·  {early['life_expectancy_at_birth']:.1f} years",
+                  '                   Birth-year period average, already including infant deaths.']
+    else:
+        lines += ['Life expectancy  ·  No exact birth-year observation available.']
+    if early['infant_death_probability'] is not None:
+        lines += [f"Before age one   ·  {early['infant_death_probability']:.1%} risk of death",
+                  f"Before age five  ·  {early['under_five_death_probability']:.1%} risk of death (includes infancy)"]
+    if early['outcome'] == 'died_in_infancy':
+        lines += ['', 'In this draw, this life ends before its first birthday.']
+    elif early['outcome'] == 'died_in_early_childhood':
+        lines += ['', 'In this draw, this life ends between its first and fifth birthdays.']
+    elif early['outcome'] == 'survived_to_five':
+        lines += ['', 'In this draw, you survive to your fifth birthday.',
+                  'Survival beyond childhood has not been simulated.']
+    else:
+        lines += ['', 'Childhood survival could not be drawn from the available data.']
+    lines += ['This scenario holds birth-year mortality rates fixed; real conditions changed.']
+    lines += ['', 'The household and culture around this possible life']
+    for key, label in [('language', 'Language'), ('religion', 'Religion'), ('food', 'Food'), ('music', 'Music')]:
+        value = story['culture'].get(key)
+        if value:
+            lines += [f"{label}  ·  {value['text']}"]
+    lines += ['These describe possible surroundings, not a predetermined identity or taste.']
+    if city['kind'] in ('rural', 'urban') and story['culture'].get('terrain'):
+        lines += [f"Country landscape context  ·  {story['culture']['terrain']}",
+                  '                           This describes the country, not a sampled village or town.']
+    if childhood_death:
+        lines += ['Food and music describe the wider community, not experiences this child necessarily had.',
+                  '', 'No adult earnings or present-day lifespan is assigned to this childhood outcome.',
+                  'A specific cause of this childhood death is not inferred.']
+    else:
+        lines += ['', f"If alive today, you would turn {story['age_this_year']} in {story['as_of_year']}.",
+                  'Conditional on survival and continued residence, current country comparisons:']
     income, life, death = (o[k] for k in ('income', 'life_expectancy', 'leading_death_category'))
-    if income:
+    if not childhood_death and income:
         lines += [f"Income context  ·  {income['value']:,.0f} international dollars / person / year ({income['year']})",
                   '                   Purchasing-power-adjusted GNI per capita, not expected earnings.']
-    else:
+    elif not childhood_death:
         lines += ['Income context  ·  No observation available.']
-    if life:
-        lines += [f"Life expectancy  ·  {life['value']:.1f} years at birth ({life['year']})",
+    if not childhood_death and life:
+        lines += [f"For comparison  ·  Today's newborn life expectancy: {life['value']:.1f} years ({life['year']})",
                   '                   A newborn measure, not your remaining life or predicted age at death.']
-    else:
+    elif not childhood_death:
         lines += ['Life expectancy  ·  No observation available.']
     specific = o.get('leading_death_cause')
-    if specific:
+    if not childhood_death and specific:
         lines += [f"Leading cause  ·  {specific['label']} ({specific['year']})",
                   f"                 {specific['caveat']}"]
-    elif death:
+    elif not childhood_death and death:
         lines += [f"Death context  ·  {death['label']} ({death['year']})",
                   f"                 {death['value']:.1f}% of deaths; largest of three broad groups.",
                   '                 Not a specific disease or a prediction of your death.']
-    else:
+    elif not childhood_death:
         lines += ['Death context  ·  No comparable observation available.']
-    lines += ['', 'These are population comparisons. Your story remains unwritten.', '',
+    lines += ['', 'A statistical possibility, not a prediction of an individual life.', '',
               f"Birth data: UN WPP 2024 / Our World in Data; {c['coverage']:.3%} of world births covered.",
               'Country draw uses source country/area boundaries, not historical political borders.',
               f"City data: {city['source']}",
@@ -69,7 +110,15 @@ def render(story):
               f"City method: {city['method']}",
               f"City limits: {city['caveat']}",
               f"Birth source: {c['url']}"]
-    for row in (income, life, specific or death):
+    if city.get('urban_source'):
+        lines += [f"Urban/rural source: {city['urban_source']}"]
+    for key, url in early['source_urls'].items():
+        lines += [f"Birth-year {key.replace('_', ' ')}: {url}"]
+    for key in ('language', 'religion', 'food', 'music'):
+        row = story['culture'].get(key)
+        if row and row.get('source_url'):
+            lines += [f"{key.title()} source: {row['source_url']}"]
+    for row in (() if childhood_death else (income, life, specific or death)):
         if row:
             lines += [f"{row['label']}: {row['source_url']}"]
     lines += [f"Repeat this draw: python3 -m veil {story['birth_year']} --seed {shlex.quote(story['seed'])}", '']

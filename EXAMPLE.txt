@@ -9,13 +9,29 @@ You draw India.
 
 Place  ·  Kolkata
           1985 population proxy; city birth counts are unavailable.
-          14 cities covered in this country; other places remain in the draw.
+          A named major city in the historical population sample; its neighbourhood, household and occupation are not modelled.
 
 Circumstances  ·  lowest fifth of the country's income distribution
                  Illustrative 20% draw, not measured birth odds.
 
-You would turn 41 in 2026.
-If you still lived there, the latest country-level comparisons are:
+At birth in 1985
+Life expectancy  ·  56.3 years
+                   Birth-year period average, already including infant deaths.
+Before age one   ·  10.3% risk of death
+Before age five  ·  14.6% risk of death (includes infancy)
+
+In this draw, you survive to your fifth birthday.
+Survival beyond childhood has not been simulated.
+
+The household and culture around this possible life
+Language  ·  Languages around you: Hindi, Bengali, Marathi, Telugu and others; English is a subsidiary official language.
+Religion  ·  Religions around you: Hindu, Muslim, Christian, Sikh and others.
+Food  ·  The largest calorie-supply category was Rice (710 kcal/person/day).
+Music  ·  A possible soundscape: local popular music alongside regional traditional and religious music.
+These describe possible surroundings, not a predetermined identity or taste.
+
+If alive today, you would turn 41 in 2026.
+Conditional on survival and continued residence, current country comparisons:
 
 Income context  ·  11,600 international dollars / person / year (2025)
                    Purchasing-power-adjusted GNI per capita, not expected earnings.
@@ -24,7 +40,7 @@ Life expectancy  ·  72.2 years at birth (2024)
 Leading cause  ·  COVID-19 (2021)
                  Leading WHO-ranked cause in the whole population, all ages and both sexes, in 2021; not your personal future cause of death. Pandemic-year rankings may differ from later years.
 
-These are population comparisons. Your story remains unwritten.
+A statistical possibility, not a prediction of an individual life.
 
 Birth data: UN WPP 2024 / Our World in Data; 99.991% of world births covered.
 Country draw uses source country/area boundaries, not historical political borders.
@@ -33,6 +49,9 @@ City denominator: https://ourworldindata.org/grapher/population
 City method: Population-weighted proxy, not birth-weighted; top 100 cities ranked in 2020, fixed 2025 boundaries. Prior five-year observation, capped at 2020.
 City limits: City and national estimates come from different population vintages; city values use UN WPP 2022 totals. Residual includes all places not represented in this city dataset.
 Birth source: https://ourworldindata.org/grapher/number-of-births-per-year
+Birth-year infant mortality: https://ourworldindata.org/grapher/infant-mortality-rates
+Birth-year under-five mortality: https://ourworldindata.org/grapher/child-mortality-around-the-world
+Food source: https://ourworldindata.org/grapher/dietary-composition-by-country
 GNI per capita, PPP: https://data.worldbank.org/indicator/NY.GNP.PCAP.PP.CD
 Period life expectancy at birth: https://data.worldbank.org/indicator/SP.DYN.LE00.IN
 COVID-19: https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/ghe-leading-causes-of-death

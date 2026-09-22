@@ -7,6 +7,14 @@ from pathlib import Path
 DATA = Path(__file__).resolve().parents[1] / "data"
 CITY_SOURCE = "https://ourworldindata.org/grapher/population-of-the-worlds-largest-cities"
 POPULATION_SOURCE = "https://ourworldindata.org/grapher/population"
+URBAN_SOURCE = "https://ourworldindata.org/grapher/share-of-population-urban"
+
+
+@lru_cache(maxsize=1)
+def _load_urban():
+    with (DATA / "settlements_urban.csv").open(encoding="utf-8", newline="") as handle:
+        return {(row["Code"], int(row["Year"])): float(row["UrbanPercent"]) / 100
+                for row in csv.DictReader(handle)}
 
 
 @lru_cache(maxsize=1)
@@ -51,6 +59,7 @@ def draw_settlement(country_code, year, rng):
         if data_year in values
     ]
     covered_total = sum(value for _, value in candidates)
+    urban_share = _load_urban().get((country_code, data_year))
     result = {
         "name": "Elsewhere in this country (other cities, towns or rural areas)",
         "kind": "unresolved",
@@ -63,7 +72,46 @@ def draw_settlement(country_code, year, rng):
         "covered_cities": len(candidates),
         "covered_population_share": None,
         "probability": None,
+        "detail": None,
+        "urban_population_share": urban_share,
+        "urban_source": URBAN_SOURCE if urban_share is not None else None,
     }
+    if urban_share is not None:
+        # National definitions and GHSL boundaries differ. Do not subtract city
+        # mass from an urban total smaller than the represented cities.
+        compatible = bool(national_total and covered_total <= national_total * urban_share)
+        city_share = covered_total / national_total if compatible else 0
+        result["covered_population_share"] = city_share if compatible else None
+        result["method"] += " Urban/rural split uses UN national-definition population shares at the same epoch."
+        result["caveat"] = (
+            "Population-weighted, not birth-weighted. Urban definitions vary by country and over time; "
+            "GHSL city boundaries and national urban classifications are not identical. "
+            "Treat their combination as a settlement proxy, not a census allocation."
+        )
+        if not compatible:
+            result["caveat"] += " Named-city allocation withheld because its denominator is missing or city totals exceed national urban population."
+        value = rng.random()
+        if compatible:
+            for name, weight in candidates:
+                probability = weight / national_total
+                if value < probability:
+                    result.update(name=name, kind="city", probability=probability,
+                                  detail="A named major city in the historical population sample; its neighbourhood, household and occupation are not modelled.")
+                    return result
+                value -= probability
+        if value < urban_share - city_share:
+            result.update(
+                name="Other urban area — an unlisted city or town" if compatible else "Urban area — city or town",
+                kind="urban", probability=urban_share - city_share,
+                detail="Classified as urban under this country's definition. This category includes unlisted large cities as well as smaller towns; its size and exact location are not modelled.",
+            )
+        else:
+            result.update(
+                name="Rural area — village or dispersed countryside settlement",
+                kind="rural", probability=1 - urban_share,
+                detail="Outside areas classified as urban under this country's definition. Village versus dispersed home is descriptive context, not a separately sampled outcome; an exact village and household occupation are not modelled.",
+            )
+        return result
     if not national_total or not candidates:
         result["name"] = "City or settlement unavailable in this dataset"
         result["caveat"] += " No covered city observation or national denominator for this country and epoch."
@@ -76,7 +124,8 @@ def draw_settlement(country_code, year, rng):
     value = rng.random() * national_total
     for name, weight in candidates:
         if value < weight:
-            result.update(name=name, kind="city", probability=weight / national_total)
+            result.update(name=name, kind="city", probability=weight / national_total,
+                          detail="A named major city in the historical population sample; its neighbourhood, household and occupation are not modelled.")
             return result
         value -= weight
     result.update(kind="residual", probability=1 - covered_total / national_total)

@@ -50,3 +50,7 @@ class StoryTests(unittest.TestCase):
         self.assertNotIn('Income context', text)
         self.assertNotIn('Income context', text)
         self.assertNotIn('You would turn', text)
+
+    def test_early_life_draw_changes_with_seed(self):
+        outcomes = {create_story(1950, str(seed), 2026)['early_life']['outcome'] for seed in range(40)}
+        self.assertGreater(len(outcomes), 1)

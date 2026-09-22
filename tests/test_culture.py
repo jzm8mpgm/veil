@@ -11,6 +11,13 @@ class CultureTests(unittest.TestCase):
         self.assertEqual(result['food']['reference_year'], 1985)
         self.assertIn('not the most-eaten dish', result['food']['method'])
 
+    def test_language_is_a_random_named_choice_with_comparison(self):
+        result = describe_culture('GHA', 1985)
+        self.assertIn('You speak ', result['language']['text'])
+        self.assertIn('% of people here', result['language']['text'])
+        self.assertNotIn('other is the most', result['language']['text'])
+        self.assertIn('choice', result['language'])
+
     def test_birth_year_selects_historical_food_observation(self):
         old = describe_culture('IND', 1961)
         recent = describe_culture('IND', 2023)

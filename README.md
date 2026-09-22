@@ -27,6 +27,11 @@ offline and presents one quiet input, one reveal and an expandable source
 panel. The visual system uses an ink background, parchment text, amber light
 and restrained typography inspired by the atmosphere of Hollow Knight.
 
+After a reveal, the page adds a focused interactive map and a smooth country
+distribution chart for life expectancy or income. The ivory marker is the
+drawn country or named city; see [map data](data/map_sources.md) for the
+coordinate method.
+
 Run it locally after installing the single app dependency:
 
 ```bash

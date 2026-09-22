@@ -90,7 +90,7 @@ def render(story):
     for key, label in [('language', 'Language'), ('religion', 'Religion'), ('food', 'Food'), ('music', 'Music')]:
         value = story['culture'].get(key)
         if value:
-            lines += [f"{label}  ·  {value['text']}"]
+            lines += [value['text']]
     lines += ['Culture  ·  Language, faith, food and music around this birthplace.']
     if city['kind'] in ('rural', 'urban') and story['culture'].get('terrain'):
         lines += [f"Country landscape context  ·  {story['culture']['terrain']}"]

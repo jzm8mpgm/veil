@@ -4,11 +4,17 @@ The statistical engine stays in ``veil/`` so this page can later be replaced
 by another presentation without changing the draw itself.
 """
 from datetime import date
+import json
 import secrets
+from pathlib import Path
 
+import altair as alt
+import pandas as pd
+import pydeck as pdk
 import streamlit as st
 
 from veil.__main__ import create_story, likelihood_label
+from veil.outcomes import _snapshot as outcomes_snapshot
 
 
 st.set_page_config(page_title="Veil", page_icon="◌", layout="centered", initial_sidebar_state="collapsed")
@@ -33,6 +39,7 @@ p, label, button, input, small, .stCaption { font-family: 'Inter', sans-serif !i
 .fact-label { color: var(--muted); font: 600 .64rem/1.4 'Inter', sans-serif; letter-spacing: .14em; text-transform: uppercase; }
 .fact-value { color: var(--paper); font: 1.3rem/1.2 'Cormorant Garamond', Georgia, serif; margin-top: .16rem; }
 .fact-note { color: var(--muted); font: .72rem/1.5 'Inter', sans-serif; margin-top: .18rem; }
+.culture-line { color: var(--paper); font: 1rem/1.45 'Cormorant Garamond', Georgia, serif; margin: .55rem 0; }
 div[data-testid="stForm"] { border: 1px solid var(--line); background: rgba(17,18,31,.6); padding: 1.2rem 1.2rem .75rem; }
 div[data-testid="stForm"] label { color: var(--muted) !important; }
 .stButton > button, div[data-testid="stFormSubmitButton"] button { background: var(--ember); border: 0; border-radius: 1px; color: #181018; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
@@ -48,6 +55,64 @@ section[data-testid="stSidebar"] { background: #0b0d16; }
 def fact(label, value, note=""):
     note_html = f'<div class="fact-note">{note}</div>' if note else ''
     st.markdown(f'<div class="fact"><div class="fact-label">{label}</div><div class="fact-value">{value}</div>{note_html}</div>', unsafe_allow_html=True)
+
+
+@st.cache_data
+def map_points():
+    path = Path(__file__).parent / 'data/map_points.json'
+    return json.loads(path.read_text())
+
+
+def show_map(story):
+    points = map_points()
+    country = story['country']['code']
+    place = story['settlement']
+    location = points['capitals'].get(country)
+    location_name = 'country centre'
+    if place['kind'] == 'city':
+        location = points['cities'].get(country, {}).get(place['name'], location)
+        location_name = place['name']
+    if not location:
+        return
+    map_data = pd.DataFrame([{'lat': location['lat'], 'lon': location['lng'], 'name': place['name']}])
+    view = pdk.ViewState(latitude=location['lat'], longitude=location['lng'], zoom=7 if place['kind'] == 'city' else 4)
+    layer = pdk.Layer('ScatterplotLayer', data=map_data, get_position='[lon, lat]', get_fill_color='[214, 168, 106, 220]', get_radius=18000 if place['kind'] == 'city' else 35000, pickable=True)
+    st.markdown('<div class="eyebrow" style="margin-top:2rem">The map remembers</div>', unsafe_allow_html=True)
+    st.caption(f'Focus: {location_name}')
+    st.pydeck_chart(pdk.Deck(initial_view_state=view, layers=[layer], tooltip={'text': '{name}'}), width='stretch')
+
+
+def show_distribution(story):
+    choices = {'Life expectancy': 'life_expectancy', 'Income per resident': 'income'}
+    selected_label = st.selectbox('Compare this birthplace', list(choices), key='comparison_metric')
+    selected_key = choices[selected_label]
+    selected = story['outcomes'].get(selected_key)
+    if not selected:
+        return
+    indicator = selected['indicator']
+    rows = []
+    for code, country in outcomes_snapshot()['countries'].items():
+        series = country.get('indicators', {}).get(indicator, [])
+        if series:
+            row = next((item for item in series if item['year'] <= story['as_of_year']), None)
+            if row:
+                rows.append({'country': country['name'], 'value': row['value']})
+    if len(rows) < 10:
+        return
+    frame = pd.DataFrame(rows)
+    frame['value'] = pd.to_numeric(frame['value'])
+    unit = 'years' if selected_key == 'life_expectancy' else 'international dollars / person / year'
+    chart = alt.Chart(frame).transform_density('value', as_=['value', 'density'], extent=[float(frame.value.min()), float(frame.value.max())], steps=80).mark_area(orient='horizontal', color='#d6a86a', opacity=.52).encode(
+        y=alt.Y('value:Q', title=unit, axis=alt.Axis(format='.0f' if selected_key == 'income' else '.1f')),
+        x=alt.X('density:Q', title=None, axis=None),
+        tooltip=[alt.Tooltip('value:Q', format=',.1f'), alt.Tooltip('density:Q', format='.3f')],
+    )
+    marker = alt.Chart(pd.DataFrame([{'value': selected['value'], 'country': story['country']['name']}])).mark_rule(color='#f2e7cf', size=2).encode(
+        y=alt.Y('value:Q'), tooltip=[alt.Tooltip('country:N'), alt.Tooltip('value:Q', format=',.1f')]
+    )
+    st.markdown('<div class="eyebrow" style="margin-top:2rem">Among countries</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="reveal-copy">{selected_label} · {story["country"]["name"]} marked in ivory</div>', unsafe_allow_html=True)
+    st.altair_chart((chart + marker).properties(height=260), width='stretch')
 
 
 def render_result(story):
@@ -80,7 +145,7 @@ def render_result(story):
     for key, label in [('language', 'Language'), ('religion', 'Religion'), ('food', 'Food'), ('music', 'Music')]:
         value = culture.get(key)
         if value:
-            fact(label, value['text'])
+            st.markdown(f'<p class="culture-line">{value["text"]}</p>', unsafe_allow_html=True)
     if place['kind'] in ('rural', 'urban') and culture.get('terrain'):
         fact('Landscape', culture['terrain'])
     if early['outcome'] not in ('died_in_infancy', 'died_in_early_childhood'):
@@ -98,6 +163,12 @@ def render_result(story):
     st.markdown('</div>', unsafe_allow_html=True)
     with st.expander('Sources'):
         st.markdown(f'<div class="source-note">Births: {country["url"]}<br>Settlement: {place["source"]}<br>Culture and food sources are included in the structured result.<br>Repeat seed: {story["seed"]}</div>', unsafe_allow_html=True)
+    show_map(story)
+    if early['outcome'] not in ('died_in_infancy', 'died_in_early_childhood'):
+        show_distribution(story)
+    if st.button('Draw another beginning', key='draw_again'):
+        st.session_state['veil_story'] = create_story(story['birth_year'], secrets.token_hex(6), date.today().year)
+        st.rerun()
 
 
 st.markdown('<div class="veil-mark">V E I L</div>', unsafe_allow_html=True)

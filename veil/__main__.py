@@ -28,7 +28,7 @@ def create_story(year, seed, today_year=None):
     rng = random.Random(str(seed))
     country = draw_country(year, rng)
     story = {
-        'title': 'VEIL — another beginning', 'birth_year': year,
+        'title': 'VEIL — behind the veil of ignorance', 'birth_year': year,
         'age_this_year': today_year - year, 'as_of_year': today_year,
         'seed': str(seed), 'country': country,
         'settlement': draw_settlement(country['code'], year, rng),
@@ -46,7 +46,8 @@ def render(story):
     early = story['early_life']
     childhood_death = early['outcome'] in ('died_in_infancy', 'died_in_early_childhood')
     lines = [
-        '', 'V E I L', 'another beginning', '',
+        '', 'V E I L', 'behind the veil of ignorance',
+        'A birthplace drawn before you know your place in the world.', '',
         f"The year is {story['birth_year']}. The place could have been different.", '',
         f"You draw {c['name']}.",
         f"{c['births']:,} estimated births that year. A {c['probability']:.2%} chance in this draw.",

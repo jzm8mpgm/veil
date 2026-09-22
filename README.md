@@ -2,6 +2,11 @@
 
 *The year is the same. The beginning is different.*
 
+Veil takes its name from John Rawls's **veil of ignorance**: the thought
+experiment of choosing the rules of society before knowing who or where you
+will be within it. Here, the veil becomes a birthplace lottery. You enter only
+your year; the demographic record chooses a beginning.
+
 A text-first experiment: enter a birth year and draw another birthplace, weighted by the estimated number of live births in each country or area that year. Python 3.10+, standard library only. Runs offline with bundled data; no accounts, tracking, API keys or installations.
 
 ## Try it

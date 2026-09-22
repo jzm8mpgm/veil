@@ -61,16 +61,16 @@ def describe_culture(country_code, birth_year, rng=None):
         'Traditional instruments and religious singing shape the sound around you.',
         'Local popular music, traditional styles and religious music share the soundscape.',
     ])
-    language_story = 'The language around you is unavailable.'
+    language_story = 'The language you speak is unavailable.'
     if language_choice:
         if language_choice['share'] is None:
-            language_story = f"You speak {language_choice['name']} among the languages of this birthplace."
+            language_story = f"The language you speak is {language_choice['name']}, among the languages of this birthplace."
         else:
             largest = max((entry for entry in language_entries if entry['share'] is not None), key=lambda entry: entry['share'])
             if language_choice['name'] == largest['name']:
-                language_story = f"You speak {language_choice['name']}, the largest listed language at about {language_choice['share']:g}% of people here."
+                language_story = f"The language you speak is {language_choice['name']}, the largest listed language at about {language_choice['share']:g}% of people here."
             else:
-                language_story = f"You speak {language_choice['name']}, used by about {language_choice['share']:g}% of people here; {largest['name']} is the most widely listed language at {largest['share']:g}%."
+                language_story = f"The language you speak is {language_choice['name']}, used by about {language_choice['share']:g}% of people here; {largest['name']} is the most widely listed language at {largest['share']:g}%."
     religion_story = 'The faith around your home is unavailable.'
     if religion_choice:
         if religion_choice['share'] is None:
@@ -94,19 +94,19 @@ def describe_culture(country_code, birth_year, rng=None):
             'source_url': source, 'reference_year': None,
         },
         'food': {
-            'text': f"{food['category']} is the main calorie source around you, supplying about {food['kcal_per_day']:.0f} kcal per person each day.",
+            'text': f"The food around you is {food['category']}, the main calorie source here, supplying about {food['kcal_per_day']:.0f} kcal per person each day.",
             'method': 'Largest national food-supply category by calories, used as a staple proxy; it is not the most-eaten dish.',
             'source_url': food_url, 'reference_year': food_year,
         } if food else {
-            'text': 'Food around you is unavailable.',
+            'text': 'The food around you is unavailable.',
             'method': 'No country-year food-supply observation was bundled.',
             'source_url': food_url, 'reference_year': None,
         },
         'music': {
-            'text': music,
+            'text': f"The music around you is shaped by this soundscape: {music}",
             'choice': music,
             'method': 'Illustrative community soundscape, not a statistically inferred personal taste or listening history.',
             'source_url': source, 'reference_year': None,
         },
-        'narrative': [language_story, religion_story, f"{food['category']} is the main calorie source around you." if food else 'Food around you is unavailable.', music],
+        'narrative': [language_story, religion_story, f"The food around you is {food['category']}." if food else 'The food around you is unavailable.', f"The music around you is shaped by this soundscape: {music}"],
     }

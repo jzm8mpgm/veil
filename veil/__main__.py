@@ -87,13 +87,13 @@ def render(story):
     else:
         lines += ['', 'Childhood survival  ·  No observation.']
     lines += ['', 'The household and culture around this life']
-    for key, label in [('language', 'Language'), ('religion', 'Religion'), ('food', 'Food'), ('music', 'Music')]:
+    for key, label in [('language', 'The language you speak'), ('religion', 'The faith around your home'), ('food', 'The food around you'), ('music', 'The music around you')]:
         value = story['culture'].get(key)
         if value:
             lines += [value['text']]
     lines += ['Culture  ·  Language, faith, food and music around this birthplace.']
     if city['kind'] in ('rural', 'urban') and story['culture'].get('terrain'):
-        lines += [f"Country landscape context  ·  {story['culture']['terrain']}"]
+        lines += [f"The landscape around you  ·  {story['culture']['terrain']}"]
     if childhood_death:
         lines += ['']
     else:

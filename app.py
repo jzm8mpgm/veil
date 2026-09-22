@@ -142,12 +142,12 @@ def render_result(story):
     }
     fact('Early life', outcome_labels[early['outcome']])
     st.markdown('<div class="eyebrow" style="margin-top:1.1rem">The life around this birthplace</div>', unsafe_allow_html=True)
-    for key, label in [('language', 'Language'), ('religion', 'Religion'), ('food', 'Food'), ('music', 'Music')]:
+    for key, label in [('language', 'The language you speak'), ('religion', 'The faith around your home'), ('food', 'The food around you'), ('music', 'The music around you')]:
         value = culture.get(key)
         if value:
             st.markdown(f'<p class="culture-line">{value["text"]}</p>', unsafe_allow_html=True)
     if place['kind'] in ('rural', 'urban') and culture.get('terrain'):
-        fact('Landscape', culture['terrain'])
+        fact('The landscape around you', culture['terrain'])
     if early['outcome'] not in ('died_in_infancy', 'died_in_early_childhood'):
         st.markdown('<div class="eyebrow" style="margin-top:1.1rem">The world today</div>', unsafe_allow_html=True)
         if outcomes.get('income'):
@@ -162,7 +162,7 @@ def render_result(story):
         fact('Age this year', str(story['age_this_year']), str(story['as_of_year']))
     st.markdown('</div>', unsafe_allow_html=True)
     with st.expander('Sources'):
-        st.markdown(f'<div class="source-note">Births: {country["url"]}<br>Settlement: {place["source"]}<br>Culture and food sources are included in the structured result.<br>Repeat seed: {story["seed"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="source-note">Births: {country["url"]}<br>Settlement: {place["source"]}<br>Culture and food sources are included in the structured result.</div>', unsafe_allow_html=True)
     show_map(story)
     if early['outcome'] not in ('died_in_infancy', 'died_in_early_childhood'):
         show_distribution(story)
@@ -176,12 +176,10 @@ st.markdown('<div class="veil-intro">Behind Rawls’s veil of ignorance, you do 
 
 with st.form('birth_form'):
     birth_year = st.number_input('Year of birth', min_value=1950, max_value=2023, value=1985, step=1)
-    seed = st.text_input('Repeatable code (optional)', placeholder='Leave empty for a new life', help='Use the same code to reveal the same draw again.')
     submitted = st.form_submit_button('Draw a beginning', use_container_width=True)
 
 if submitted:
-    chosen_seed = seed.strip() or secrets.token_hex(6)
-    st.session_state['veil_story'] = create_story(int(birth_year), chosen_seed, date.today().year)
+    st.session_state['veil_story'] = create_story(int(birth_year), secrets.token_hex(6), date.today().year)
 
 if 'veil_story' in st.session_state:
     render_result(st.session_state['veil_story'])

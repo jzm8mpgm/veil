@@ -13,7 +13,7 @@ class CultureTests(unittest.TestCase):
 
     def test_language_is_a_random_named_choice_with_comparison(self):
         result = describe_culture('GHA', 1985)
-        self.assertIn('You speak ', result['language']['text'])
+        self.assertIn('The language you speak is ', result['language']['text'])
         self.assertIn('% of people here', result['language']['text'])
         self.assertNotIn('other is the most', result['language']['text'])
         self.assertIn('choice', result['language'])

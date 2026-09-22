@@ -1,6 +1,10 @@
 """Streamlit Cloud entrypoint for Veil.
 
-The canonical local command remains ``streamlit run app.py``; this small
-wrapper also supports the conventional ``streamlit_app.py`` Cloud path.
+The app must be executed on every Streamlit rerun. ``runpy`` deliberately
+avoids Python's import cache, which would otherwise leave the Cloud page blank
+after the form submits.
 """
-from app import *  # noqa: F401,F403
+from pathlib import Path
+import runpy
+
+runpy.run_path(str(Path(__file__).with_name('app.py')), run_name='__main__')

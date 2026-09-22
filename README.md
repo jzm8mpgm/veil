@@ -35,7 +35,8 @@ streamlit run app.py
 ```
 
 For Streamlit Community Cloud, connect the GitHub repository, choose `main` as
-the branch and `app.py` as the entrypoint. Community Cloud reads the root
+the branch and `streamlit_app.py` as the entrypoint. (`app.py` also works
+locally.) Community Cloud reads the root
 `requirements.txt` and `.streamlit/config.toml`; subsequent GitHub commits
 become app updates through the connected deployment.
 

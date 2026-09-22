@@ -8,7 +8,7 @@ import secrets
 
 import streamlit as st
 
-from veil.__main__ import create_story
+from veil.__main__ import create_story, likelihood_label
 
 
 st.set_page_config(page_title="Veil", page_icon="◌", layout="centered", initial_sidebar_state="collapsed")
@@ -59,9 +59,13 @@ def render_result(story):
     st.markdown('<div class="draw-card">', unsafe_allow_html=True)
     st.markdown('<div class="eyebrow">Your beginning</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="reveal-title">{country["name"]}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="reveal-copy">{country["births"]:,} estimated births in {story["birth_year"]} · {country["probability"]:.2%} of the draw</div>', unsafe_allow_html=True)
-    fact('Place', place['name'], place.get('detail') or '')
-    fact('Circumstances', story['socioeconomic']['name'])
+    st.markdown(f'<div class="reveal-copy">{country["births"]:,} estimated births in {story["birth_year"]} · {country["probability"]:.2%} · {likelihood_label(country["probability"])}</div>', unsafe_allow_html=True)
+    place_note = place.get('detail') or ''
+    if place.get('probability') is not None:
+        place_note = f'{place_note} · {place["probability"]:.2%} · {likelihood_label(place["probability"])}'
+    fact('Place', place['name'], place_note)
+    group = story['socioeconomic']
+    fact('Circumstances', group['name'], f'{group["probability"]:.0%} · {likelihood_label(group["probability"])}')
     fact('Birth-year life expectancy', f'{early["life_expectancy_at_birth"]:.1f} years' if early['life_expectancy_at_birth'] is not None else 'Unavailable', f'{early["year"]}')
     if early['infant_death_probability'] is not None:
         fact('Before age one', f'{early["infant_death_probability"]:.1%} risk', f'Before age five: {early["under_five_death_probability"]:.1%}')
@@ -101,7 +105,7 @@ st.markdown('<div class="veil-intro">Behind Rawls’s veil of ignorance, you do 
 
 with st.form('birth_form'):
     birth_year = st.number_input('Year of birth', min_value=1950, max_value=2023, value=1985, step=1)
-    seed = st.text_input('Seed', placeholder='Leave empty for a new life')
+    seed = st.text_input('Repeatable code (optional)', placeholder='Leave empty for a new life', help='Use the same code to reveal the same draw again.')
     submitted = st.form_submit_button('Draw a beginning', use_container_width=True)
 
 if submitted:

@@ -13,6 +13,17 @@ from .history import draw_early_life
 from .culture import describe_culture
 
 
+def likelihood_label(probability):
+    """Turn a probability into a plain-language rarity label."""
+    if probability is None:
+        return 'unknown'
+    if probability >= 0.05:
+        return 'fair'
+    if probability >= 0.01:
+        return 'rare'
+    return 'very rare'
+
+
 def _clean_story(value):
     """Keep the structured result focused on the drawn story."""
     if isinstance(value, dict):
@@ -50,12 +61,12 @@ def render(story):
         'A birthplace drawn before you know your place in the world.', '',
         f"The year is {story['birth_year']}. The place could have been different.", '',
         f"You draw {c['name']}.",
-        f"{c['births']:,} estimated births that year. A {c['probability']:.2%} chance in this draw.",
+        f"{c['births']:,} estimated births that year. {c['probability']:.2%} · {likelihood_label(c['probability'])}.",
         '', f"Place  ·  {city['name']}",
         f"          {city['year']} population estimate.",
         f"          {city.get('detail') or 'Settlement detail unavailable for this year.'}",
         '', f"Circumstances  ·  {group['name']}",
-        '                 Fifth of the national income distribution.',
+        f"                 Fifth of the national income distribution · {likelihood_label(group.get('probability'))}.",
     ]
     lines += ['', f"At birth in {story['birth_year']}"]
     if early['life_expectancy_at_birth'] is not None:

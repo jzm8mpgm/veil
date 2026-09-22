@@ -2,11 +2,17 @@ import json
 import random
 import unittest
 from unittest.mock import patch
-from veil.__main__ import create_story, render
+from veil.__main__ import create_story, render, likelihood_label
 from veil.settlements import draw_settlement
 
 
 class StoryTests(unittest.TestCase):
+    def test_likelihood_labels_are_plain_language(self):
+        self.assertEqual(likelihood_label(0.2), 'fair')
+        self.assertEqual(likelihood_label(0.02), 'rare')
+        self.assertEqual(likelihood_label(0.002), 'very rare')
+        self.assertEqual(likelihood_label(None), 'unknown')
+
     def test_repeatable_serializable_story_and_honest_labels(self):
         story = create_story(1985, 'first-light', 2026)
         self.assertEqual(story, create_story(1985, 'first-light', 2026))

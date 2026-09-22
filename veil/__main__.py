@@ -1,4 +1,4 @@
-"""Run with python3 -m lore [birth-year] [--seed any-text] [--json]."""
+"""Run with python3 -m veil [birth-year] [--seed any-text] [--json]."""
 import argparse
 from datetime import date
 import json
@@ -16,7 +16,7 @@ def create_story(year, seed, today_year=None):
     rng = random.Random(str(seed))
     country = draw_country(year, rng)
     return {
-        'title': 'LORE — another beginning', 'birth_year': year,
+        'title': 'VEIL — another beginning', 'birth_year': year,
         'age_this_year': today_year - year, 'as_of_year': today_year,
         'seed': str(seed), 'country': country,
         'settlement': draw_settlement(country['code'], year, rng),
@@ -28,7 +28,7 @@ def create_story(year, seed, today_year=None):
 def render(story):
     c, city, group, o = (story[k] for k in ('country', 'settlement', 'socioeconomic', 'outcomes'))
     lines = [
-        '', 'L O R E', 'another beginning', '',
+        '', 'V E I L', 'another beginning', '',
         f"The year is {story['birth_year']}. The place could have been different.", '',
         f"You draw {c['name']}.",
         f"{c['births']:,} estimated births that year. A {c['probability']:.2%} chance in this draw.",
@@ -72,12 +72,12 @@ def render(story):
     for row in (income, life, specific or death):
         if row:
             lines += [f"{row['label']}: {row['source_url']}"]
-    lines += [f"Repeat this draw: python3 -m lore {story['birth_year']} --seed {shlex.quote(story['seed'])}", '']
+    lines += [f"Repeat this draw: python3 -m veil {story['birth_year']} --seed {shlex.quote(story['seed'])}", '']
     return '\n'.join(lines)
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description='LORE: a sourced birthplace lottery. Historical years: 1950–2023.')
+    parser = argparse.ArgumentParser(description='VEIL: a sourced birthplace lottery. Historical years: 1950–2023.')
     parser.add_argument('year', nargs='?', type=int, help='Your year of birth, 1950–2023')
     parser.add_argument('--seed', help='Repeatable draw; any text. Omit for a fresh draw.')
     parser.add_argument('--json', action='store_true', help='Structured result with sources and limitations')

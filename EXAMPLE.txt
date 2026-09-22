@@ -1,5 +1,5 @@
 
-L O R E
+V E I L
 another beginning
 
 The year is 1985. The place could have been different.
@@ -36,4 +36,4 @@ Birth source: https://ourworldindata.org/grapher/number-of-births-per-year
 GNI per capita, PPP: https://data.worldbank.org/indicator/NY.GNP.PCAP.PP.CD
 Period life expectancy at birth: https://data.worldbank.org/indicator/SP.DYN.LE00.IN
 COVID-19: https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/ghe-leading-causes-of-death
-Repeat this draw: python3 -m lore 1985 --seed 1
+Repeat this draw: python3 -m veil 1985 --seed 1

@@ -1,6 +1,6 @@
 import random
 import unittest
-from lore.births import draw_country, snapshot
+from veil.births import draw_country, snapshot
 
 
 class BirthTests(unittest.TestCase):

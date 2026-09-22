@@ -1,4 +1,4 @@
-# Lore
+# Veil
 
 *The year is the same. The beginning is different.*
 
@@ -7,11 +7,11 @@ A text-first experiment: enter a birth year and draw another birthplace, weighte
 ## Try it
 
 ```bash
-cd /home/jzm8mpgm/Projects/lore
-python3 -m lore
-python3 -m lore 1985 --seed first-light
-python3 -m lore 1985 --seed 1
-python3 -m lore 1985 --json
+cd /home/jzm8mpgm/Projects/veil
+python3 -m veil
+python3 -m veil 1985 --seed first-light
+python3 -m veil 1985 --seed 1
+python3 -m veil 1985 --json
 python3 -m unittest discover -s tests -v
 ```
 

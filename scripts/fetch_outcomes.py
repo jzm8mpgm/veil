@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rebuild the compact World Bank outcomes snapshot (network required).
 
-Use --cache-dir /tmp to reuse lore-{countries,income,health}.json downloads.
+Use --cache-dir /tmp to reuse veil-{countries,income,health}.json downloads.
 All source records from 2015 onward are retained for as-of-year selection.
 """
 import argparse
@@ -26,7 +26,7 @@ def main():
     args = parser.parse_args()
     responses = {}
     for key, url in URLS.items():
-        cached = args.cache_dir / f'lore-{key}.json' if args.cache_dir else None
+        cached = args.cache_dir / f'veil-{key}.json' if args.cache_dir else None
         if cached and cached.exists():
             response = json.loads(cached.read_text())
         else:
@@ -62,7 +62,7 @@ def main():
     target = ROOT / 'data/outcomes.json'
     target.write_text(json.dumps(output, separators=(',', ':'), ensure_ascii=False) + '\n')
     print(f'Wrote {len(countries)} country/economy records to {target}')
-    cached = args.cache_dir / 'lore-who-causes.json' if args.cache_dir else None
+    cached = args.cache_dir / 'veil-who-causes.json' if args.cache_dir else None
     if cached and cached.exists():
         causes = json.loads(cached.read_text())
     else:

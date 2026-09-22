@@ -2,8 +2,8 @@ import json
 import random
 import unittest
 from unittest.mock import patch
-from lore.__main__ import create_story, render
-from lore.settlements import draw_settlement
+from veil.__main__ import create_story, render
+from veil.settlements import draw_settlement
 
 
 class StoryTests(unittest.TestCase):
@@ -19,7 +19,7 @@ class StoryTests(unittest.TestCase):
     def test_city_probability_leaves_residual(self):
         population = {('ABC', 1985): 1000}
         cities = {'ABC': {'Example': {1985: 100}}}
-        with patch('lore.settlements._load', return_value=(population, cities)):
+        with patch('veil.settlements._load', return_value=(population, cities)):
             class Fixed:
                 def __init__(self, value): self.value = value
                 def random(self): return self.value

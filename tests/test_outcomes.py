@@ -1,6 +1,6 @@
 import unittest
 
-from lore.outcomes import get_outcomes
+from veil.outcomes import get_outcomes
 
 
 class OutcomesTests(unittest.TestCase):

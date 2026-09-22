@@ -8,11 +8,11 @@ You draw India.
 27,366,950 estimated births that year. A 20.07% chance in this draw.
 
 Place  ·  Kolkata
-          1985 population proxy; city birth counts are unavailable.
-          A named major city in the historical population sample; its neighbourhood, household and occupation are not modelled.
+          1985 population estimate.
+          A named major city in the historical population sample.
 
 Circumstances  ·  lowest fifth of the country's income distribution
-                 Illustrative 20% draw, not measured birth odds.
+                 Fifth of the national income distribution.
 
 At birth in 1985
 Life expectancy  ·  56.3 years
@@ -21,33 +21,30 @@ Before age one   ·  10.3% risk of death
 Before age five  ·  14.6% risk of death (includes infancy)
 
 In this draw, you survive to your fifth birthday.
-Survival beyond childhood has not been simulated.
+The story continues from this fifth birthday.
 
-The household and culture around this possible life
+The household and culture around this life
 Language  ·  Languages around you: Hindi, Bengali, Marathi, Telugu and others; English is a subsidiary official language.
 Religion  ·  Religions around you: Hindu, Muslim, Christian, Sikh and others.
 Food  ·  The largest calorie-supply category was Rice (710 kcal/person/day).
-Music  ·  A possible soundscape: local popular music alongside regional traditional and religious music.
-These describe possible surroundings, not a predetermined identity or taste.
+Music  ·  Local popular music alongside regional traditional and religious music.
+Culture  ·  Language, faith, food and music around this birthplace.
 
 If alive today, you would turn 41 in 2026.
-Conditional on survival and continued residence, current country comparisons:
+Current country comparisons:
 
 Income context  ·  11,600 international dollars / person / year (2025)
-                   Purchasing-power-adjusted GNI per capita, not expected earnings.
+                   Purchasing-power-adjusted GNI per capita.
 Life expectancy  ·  72.2 years at birth (2024)
-                   A newborn measure, not your remaining life or predicted age at death.
+                   Period measure for a newborn in that year.
 Leading cause  ·  COVID-19 (2021)
-                 Leading WHO-ranked cause in the whole population, all ages and both sexes, in 2021; not your personal future cause of death. Pandemic-year rankings may differ from later years.
+                 WHO estimate for all ages and both sexes (2021).
 
-A statistical possibility, not a prediction of an individual life.
+The life drawn from the veil.
 
 Birth data: UN WPP 2024 / Our World in Data; 99.991% of world births covered.
-Country draw uses source country/area boundaries, not historical political borders.
 City data: https://ourworldindata.org/grapher/population-of-the-worlds-largest-cities
 City denominator: https://ourworldindata.org/grapher/population
-City method: Population-weighted proxy, not birth-weighted; top 100 cities ranked in 2020, fixed 2025 boundaries. Prior five-year observation, capped at 2020.
-City limits: City and national estimates come from different population vintages; city values use UN WPP 2022 totals. Residual includes all places not represented in this city dataset.
 Birth source: https://ourworldindata.org/grapher/number-of-births-per-year
 Birth-year infant mortality: https://ourworldindata.org/grapher/infant-mortality-rates
 Birth-year under-five mortality: https://ourworldindata.org/grapher/child-mortality-around-the-world

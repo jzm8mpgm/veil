@@ -13,8 +13,8 @@ class StoryTests(unittest.TestCase):
         self.assertEqual(json.loads(json.dumps(story)), story)
         self.assertEqual(story['age_this_year'], 41)
         text = render(story)
-        self.assertIn('Illustrative', text)
-        self.assertIn('population proxy', text)
+        self.assertIn('Fifth of the national income distribution', text)
+        self.assertIn('population estimate', text)
 
     def test_city_probability_leaves_residual(self):
         population = {('ABC', 1985): 1000}
@@ -42,4 +42,5 @@ class StoryTests(unittest.TestCase):
         text = render(story)
         self.assertIn('this life ends before its first birthday', text)
         self.assertNotIn('Income context', text)
-        self.assertIn('No adult earnings', text)
+        self.assertNotIn('Income context', text)
+        self.assertNotIn('You would turn', text)

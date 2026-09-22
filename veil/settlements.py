@@ -96,20 +96,20 @@ def draw_settlement(country_code, year, rng):
                 probability = weight / national_total
                 if value < probability:
                     result.update(name=name, kind="city", probability=probability,
-                                  detail="A named major city in the historical population sample; its neighbourhood, household and occupation are not modelled.")
+                                  detail="A named major city in the historical population sample.")
                     return result
                 value -= probability
         if value < urban_share - city_share:
             result.update(
                 name="Other urban area — an unlisted city or town" if compatible else "Urban area — city or town",
                 kind="urban", probability=urban_share - city_share,
-                detail="Classified as urban under this country's definition. This category includes unlisted large cities as well as smaller towns; its size and exact location are not modelled.",
+                detail="An unlisted city or town within the country's urban population.",
             )
         else:
             result.update(
                 name="Rural area — village or dispersed countryside settlement",
                 kind="rural", probability=1 - urban_share,
-                detail="Outside areas classified as urban under this country's definition. Village versus dispersed home is descriptive context, not a separately sampled outcome; an exact village and household occupation are not modelled.",
+                detail="A village or dispersed countryside settlement outside the country's urban areas.",
             )
         return result
     if not national_total or not candidates:
@@ -125,7 +125,7 @@ def draw_settlement(country_code, year, rng):
     for name, weight in candidates:
         if value < weight:
             result.update(name=name, kind="city", probability=weight / national_total,
-                          detail="A named major city in the historical population sample; its neighbourhood, household and occupation are not modelled.")
+                          detail="A named major city in the historical population sample.")
             return result
         value -= weight
     result.update(kind="residual", probability=1 - covered_total / national_total)

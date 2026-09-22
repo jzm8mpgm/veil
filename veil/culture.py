@@ -42,12 +42,12 @@ def describe_culture(country_code, birth_year, rng=None):
     return {
         'terrain': terrain,
         'language': {
-            'text': f"Languages around you: {language}." if language else 'A national language profile is unavailable.',
+            'text': f"Languages around you: {language}." if language else 'Languages around you: unavailable.',
             'method': 'Country-level language listing; it does not determine the language a household used.',
             'source_url': source, 'reference_year': None,
         },
         'religion': {
-            'text': f"Religions around you: {religion}." if religion else 'A national religion profile is unavailable.',
+            'text': f"Religions around you: {religion}." if religion else 'Religions around you: unavailable.',
             'method': 'Country-level religious composition; it does not determine an individual belief.',
             'source_url': source, 'reference_year': None,
         },
@@ -56,12 +56,12 @@ def describe_culture(country_code, birth_year, rng=None):
             'method': 'Largest national food-supply category by calories, used as a staple proxy; it is not the most-eaten dish.',
             'source_url': food_url, 'reference_year': food_year,
         } if food else {
-            'text': 'A historical food-supply category is unavailable.',
+            'text': 'Food around you: unavailable.',
             'method': 'No country-year food-supply observation was bundled.',
             'source_url': food_url, 'reference_year': None,
         },
         'music': {
-            'text': 'A possible soundscape: ' + music + (f" Terrain and place context: {terrain}." if terrain else '.'),
+            'text': 'Music around you: ' + music + (f" Terrain and place context: {terrain}." if terrain else '.'),
             'method': 'Illustrative community soundscape, not a statistically inferred personal taste or listening history.',
             'source_url': source, 'reference_year': None,
         },

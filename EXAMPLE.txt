@@ -1,0 +1,39 @@
+
+L O R E
+another beginning
+
+The year is 1985. The place could have been different.
+
+You draw India.
+27,366,950 estimated births that year. A 20.07% chance in this draw.
+
+Place  ·  Kolkata
+          1985 population proxy; city birth counts are unavailable.
+          14 cities covered in this country; other places remain in the draw.
+
+Circumstances  ·  lowest fifth of the country's income distribution
+                 Illustrative 20% draw, not measured birth odds.
+
+You would turn 41 in 2026.
+If you still lived there, the latest country-level comparisons are:
+
+Income context  ·  11,600 international dollars / person / year (2025)
+                   Purchasing-power-adjusted GNI per capita, not expected earnings.
+Life expectancy  ·  72.2 years at birth (2024)
+                   A newborn measure, not your remaining life or predicted age at death.
+Leading cause  ·  COVID-19 (2021)
+                 Leading WHO-ranked cause in the whole population, all ages and both sexes, in 2021; not your personal future cause of death. Pandemic-year rankings may differ from later years.
+
+These are population comparisons. Your story remains unwritten.
+
+Birth data: UN WPP 2024 / Our World in Data; 99.991% of world births covered.
+Country draw uses source country/area boundaries, not historical political borders.
+City data: https://ourworldindata.org/grapher/population-of-the-worlds-largest-cities
+City denominator: https://ourworldindata.org/grapher/population
+City method: Population-weighted proxy, not birth-weighted; top 100 cities ranked in 2020, fixed 2025 boundaries. Prior five-year observation, capped at 2020.
+City limits: City and national estimates come from different population vintages; city values use UN WPP 2022 totals. Residual includes all places not represented in this city dataset.
+Birth source: https://ourworldindata.org/grapher/number-of-births-per-year
+GNI per capita, PPP: https://data.worldbank.org/indicator/NY.GNP.PCAP.PP.CD
+Period life expectancy at birth: https://data.worldbank.org/indicator/SP.DYN.LE00.IN
+COVID-19: https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/ghe-leading-causes-of-death
+Repeat this draw: python3 -m lore 1985 --seed 1

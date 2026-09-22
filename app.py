@@ -79,7 +79,15 @@ def show_map(story):
     layer = pdk.Layer('ScatterplotLayer', data=map_data, get_position='[lon, lat]', get_fill_color='[214, 168, 106, 220]', get_radius=18000 if place['kind'] == 'city' else 35000, pickable=True)
     st.markdown('<div class="eyebrow" style="margin-top:2rem">The map remembers</div>', unsafe_allow_html=True)
     st.caption(f'Focus: {location_name}')
-    st.pydeck_chart(pdk.Deck(initial_view_state=view, layers=[layer], tooltip={'text': '{name}'}), width='stretch')
+    st.pydeck_chart(
+        pdk.Deck(
+            initial_view_state=view,
+            views=[pdk.View(type='MapView', controller=False)],
+            layers=[layer],
+            tooltip={'text': '{name}'},
+        ),
+        width='stretch',
+    )
 
 
 def show_distribution(story):
@@ -124,6 +132,7 @@ def render_result(story):
     st.markdown('<div class="draw-card">', unsafe_allow_html=True)
     st.markdown('<div class="eyebrow">Your beginning</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="reveal-title">{country["name"]}</div>', unsafe_allow_html=True)
+    show_map(story)
     st.markdown(f'<div class="reveal-copy">{country["births"]:,} estimated births in {story["birth_year"]} · {country["probability"]:.2%} · {likelihood_label(country["probability"])}</div>', unsafe_allow_html=True)
     place_note = place.get('detail') or ''
     if place.get('probability') is not None:
@@ -163,7 +172,6 @@ def render_result(story):
     st.markdown('</div>', unsafe_allow_html=True)
     with st.expander('Sources'):
         st.markdown(f'<div class="source-note">Births: {country["url"]}<br>Settlement: {place["source"]}<br>Culture and food sources are included in the structured result.</div>', unsafe_allow_html=True)
-    show_map(story)
     if early['outcome'] not in ('died_in_infancy', 'died_in_early_childhood'):
         show_distribution(story)
     if st.button('Draw another beginning', key='draw_again'):

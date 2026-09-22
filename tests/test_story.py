@@ -35,3 +35,11 @@ class StoryTests(unittest.TestCase):
         result = draw_settlement('XXX', 1985, random.Random(1))
         self.assertEqual(result['kind'], 'unresolved')
         self.assertIsNone(result['probability'])
+
+    def test_early_death_does_not_receive_adult_outcomes(self):
+        story = create_story(1950, '3', 2026)
+        self.assertEqual(story['early_life']['outcome'], 'died_in_infancy')
+        text = render(story)
+        self.assertIn('this life ends before its first birthday', text)
+        self.assertNotIn('Income context', text)
+        self.assertIn('No adult earnings', text)
